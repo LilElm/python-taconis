@@ -224,31 +224,23 @@ def main():
         #=====================================================================
         # Perform a Fourier transform on the Lorentzian signal
         
-        x_fft = fft(sweepDict[name].x)
-        y_fft = fft(sweepDict[name].y)
+        sweepDict[name].z = sweepDict[name].x + 1j * sweepDict[name].y
+        z_fft = fft(sweepDict[name].z)
         n = len(sweepDict[name].freq)
         freq_fft = fftfreq(n, sweepDict[name].freq[1] - sweepDict[name].freq[0])
+
         
-        
-        x_fft_shifted = np.abs(fftshift(x_fft))
-        y_fft_shifted = np.abs(fftshift(y_fft))
-        #x_fft_shifted = fftshift(x_fft)
-        #y_fft_shifted = fftshift(y_fft)
+        z_fft_shifted = fftshift(z_fft)
         freq_fft_shifted = fftshift(freq_fft)
         
         # Implement a low-pass filter
-        cutoff = 0.12 # Hz
-        x_fft_filtered = np.where(np.abs(freq_fft) < cutoff, x_fft, 0)
-        y_fft_filtered = np.where(np.abs(freq_fft) < cutoff, y_fft, 0)
+        cutoff = 0.02 # Hz
+        z_fft_filtered = np.where(np.abs(freq_fft) < cutoff, z_fft, 0)
         
-        x_filtered = ifft(x_fft_filtered)
-        y_filtered = ifft(y_fft_filtered)
-        
-        
-        
-        
-        
-        
+        z_filtered = ifft(z_fft_filtered)
+        x_filtered = z_filtered.real
+        y_filtered = z_filtered.imag
+
         
         
         fig = plt.figure()
@@ -265,9 +257,8 @@ def main():
         
         
         ax3 = fig.add_subplot(3,1,3)
-        ax3.plot(freq_fft_shifted, x_fft_shifted, label="FFT x")
-        ax3.plot(freq_fft_shifted, y_fft_shifted, label="FFT y")
-        ax3.set_xbound(0,)
+        ax3.plot(freq_fft_shifted, np.abs(z_fft_shifted), label="FFT")
+        #ax3.set_xbound(0,)
         ax3.legend()
         
         
@@ -277,19 +268,7 @@ def main():
         plt.close()
         
 
- 
-        """
-        fig = plt.figure()
-        ax = fig.add_subplot(1,1,1)
-        plt.plot(sweepDict[name].freqs_shifted, sweepDict[name].x_fft_shifted, label="x")
-        plt.plot(sweepDict[name].freqs_shifted, sweepDict[name].y_fft_shifted, label="y")
-        ax.legend()
-        plt.show()
-        input("00000000")
-        plt.close()
         
-
-        """
 
 
 

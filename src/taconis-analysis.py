@@ -3,12 +3,12 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.fft import fft, fftfreq, fftshift
+from scipy.fft import fft, fftfreq, fftshift, ifft
 from chart import InteractivePlot, InteractiveScatter, Chart2D
 from lorentzian import (fit_lorentzian, fit_noise, fit_noise_v2,
                         lorentzian_real, lorentzian_imag,
                         mag)
-
+#from scipy.signal import butter, sosfiltfilt
 
 
 class SweepFile():
@@ -185,7 +185,7 @@ def main():
     #chart_noisy_fit_y = Chart(name="Noisy fit")
     
     
-    
+    #chart_norm = InteractivePlot(name="Lorentzians / Fit")
     
 
     
@@ -223,33 +223,73 @@ def main():
         
         #=====================================================================
         # Perform a Fourier transform on the Lorentzian signal
-        """
+        
         x_fft = fft(sweepDict[name].x)
         y_fft = fft(sweepDict[name].y)
-        
         n = len(sweepDict[name].freq)
-        x_freqs = fftfreq(n, sweepDict[name].x[1] - sweepDict[name].x[0])
-        y_freqs = fftfreq(n, sweepDict[name].y[1] - sweepDict[name].y[0])
+        freq_fft = fftfreq(n, sweepDict[name].freq[1] - sweepDict[name].freq[0])
         
         
-        sweepDict[name].x_fft_shifted = np.abs(fftshift(x_fft))
-        sweepDict[name].y_fft_shifted = np.abs(fftshift(y_fft))
+        x_fft_shifted = np.abs(fftshift(x_fft))
+        y_fft_shifted = np.abs(fftshift(y_fft))
+        #x_fft_shifted = fftshift(x_fft)
+        #y_fft_shifted = fftshift(y_fft)
+        freq_fft_shifted = fftshift(freq_fft)
         
-        sweepDict[name].x_freqs_shifted = fftshift(x_freqs)
-        sweepDict[name].y_freqs_shifted = fftshift(y_freqs)
+        # Implement a low-pass filter
+        cutoff = 0.12 # Hz
+        x_fft_filtered = np.where(np.abs(freq_fft) < cutoff, x_fft, 0)
+        y_fft_filtered = np.where(np.abs(freq_fft) < cutoff, y_fft, 0)
+        
+        x_filtered = ifft(x_fft_filtered)
+        y_filtered = ifft(y_fft_filtered)
+        
+        
+        
+        
+        
+        
         
         
         fig = plt.figure()
+        ax1 = fig.add_subplot(3,1,1)
+        ax1.plot(sweepDict[name].freq, sweepDict[name].x, label="x")
+        ax1.plot(sweepDict[name].freq, sweepDict[name].y, label="y")
+        ax1.legend()
+        
+        
+        ax2 = fig.add_subplot(3,1,2)
+        ax2.plot(sweepDict[name].freq, x_filtered, label="filtered x")
+        ax2.plot(sweepDict[name].freq, y_filtered, label="filtered y")
+        ax2.legend()
+        
+        
+        ax3 = fig.add_subplot(3,1,3)
+        ax3.plot(freq_fft_shifted, x_fft_shifted, label="FFT x")
+        ax3.plot(freq_fft_shifted, y_fft_shifted, label="FFT y")
+        ax3.set_xbound(0,)
+        ax3.legend()
+        
+        
+        
+        plt.show()
+        input("00000000")
+        plt.close()
+        
+
+ 
+        """
+        fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
-        plt.plot(sweepDict[name].x_freqs_shifted, sweepDict[name].x_fft_shifted, label="x")
-        plt.plot(sweepDict[name].y_freqs_shifted, sweepDict[name].y_fft_shifted, label="y")
+        plt.plot(sweepDict[name].freqs_shifted, sweepDict[name].x_fft_shifted, label="x")
+        plt.plot(sweepDict[name].freqs_shifted, sweepDict[name].y_fft_shifted, label="y")
         ax.legend()
         plt.show()
         input("00000000")
         plt.close()
+        
+
         """
-
-
 
 
 
@@ -324,7 +364,44 @@ def main():
         """
         
         
+        #=====================================================================
+        #=====================================================================
+        # Divide the Lorentzian by the fit in attempt to classify the
+        # elctrical noise
         
+        
+        #sweepDict[name].x_norm = sweepDict[name].x / sweepDict[name].x_fit
+        #sweepDict[name].y_norm = sweepDict[name].y / sweepDict[name].y_fit
+        """
+        chart_norm.add_line(sweepDict[name].freq,
+                                       sweepDict[name].x_norm,
+                                       pressure,
+                                       label=f"x + {label}")
+        chart_norm.add_line(sweepDict[name].freq,
+                                       sweepDict[name].y_norm,
+                                       pressure,
+                                       label=f"y + {label}")
+        """
+        
+        """
+        fig = plt.figure(layout='constrained')
+        ax1 = fig.add_subplot(1,1,1)
+        ax1.plot(sweepDict[name].freq, sweepDict[name].x_norm, label = "x norm")
+        ax1.plot(sweepDict[name].freq, sweepDict[name].y_norm, label = "y norm")
+        ax1.legend()
+        
+        
+        ax2 = fig.add_subplot(2,1,1)
+        ax2.sharex(ax1)
+        ax2.plot(sweepDict[name].freq, sweepDict[name].x, label = "x")
+        ax2.plot(sweepDict[name].freq, sweepDict[name].y, label = "y")
+        ax2.legend()
+        
+        
+        plt.show()
+        input("=====")
+        plt.close()
+        """
         
         #=================================================================
         #=================================================================
@@ -345,6 +422,68 @@ def main():
                                sweepDict[name].y_fit_delta,
                                pressure,
                                label=label)
+
+
+
+        #=====================================================================
+        #=====================================================================
+        # Divide the delta by the fit in attempt to classify the
+        # elctrical noise
+        
+        
+        #sweepDict[name].x_norm = sweepDict[name].x_fit_delta / sweepDict[name].x_fit
+        #sweepDict[name].y_norm = sweepDict[name].y_fit_delta / sweepDict[name].y_fit
+        """
+        chart_norm.add_line(sweepDict[name].freq,
+                                       sweepDict[name].x_norm,
+                                       pressure,
+                                       label=f"x + {label}")
+        chart_norm.add_line(sweepDict[name].freq,
+                                       sweepDict[name].y_norm,
+                                       pressure,
+                                       label=f"y + {label}")
+        """
+        
+        """
+        fig = plt.figure(layout='constrained')
+        ax1 = fig.add_subplot(1,1,1)
+        ax1.plot(sweepDict[name].freq, sweepDict[name].x_norm, label = "x norm")
+        ax1.plot(sweepDict[name].freq, sweepDict[name].y_norm, label = "y norm")
+        ax1.legend()
+        
+        
+        ax2 = fig.add_subplot(2,1,1)
+        ax2.sharex(ax1)
+        ax2.plot(sweepDict[name].freq, sweepDict[name].x, label = "x")
+        ax2.plot(sweepDict[name].freq, sweepDict[name].y, label = "y")
+        ax2.legend()
+        
+        
+        plt.show()
+        input("=====")
+        plt.close()
+        
+        """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         #=================================================================
         #=================================================================
@@ -556,7 +695,7 @@ def main():
     chart_noise_moving_x.show()
     chart_noise_moving_y.show()
     
-    
+   # chart_norm.show()
     
     
     #=========================================================================

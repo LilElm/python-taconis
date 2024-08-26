@@ -45,6 +45,10 @@
 
  * Created GitHub repository and uploaded previous work
 
+ * Fourier transforms reveal that the sampling rate from 2024.08.23 data is insufficient
+
+ * FFT low-pass filters implemented
+
  
 
 </sub>

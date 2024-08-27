@@ -56,7 +56,7 @@ def main():
     parent_dir = "C:/Users/ultservi/Desktop/Elmy/python-taconis/dat/"
     
     for folder, dirs, files in os.walk(parent_dir, topdown=False):
-        if "2024.08.23" in folder:
+        #if "2024.08.23" in folder:
         
         #for folder in dirs:
          #   for root2, dirs, files in os.walk(os.path.join(parent_dir, folder), topdown=False):
@@ -220,7 +220,97 @@ def main():
                               pressure,
                               label=label)
 
+        #=====================================================================
+        # Mask the electromic noise
+        # The electronic noise begins at 5.6530 MHz
+        # It lasts for 0.0015 MHz
+        # It next starts at 5.6585 MHz (0.0055 MHz difference)
+
+
+        #lower_bound = 5.103e6
+        lower_bound = 5.6518e6
+        step_bound = 0.002e6
+        max_bound = 5.75e6
         
+        
+        
+        repeat_bound = 0.0055e6
+        
+        
+        
+        lower_bounds = np.arange(lower_bound, max_bound, repeat_bound)
+        upper_bounds = lower_bounds + step_bound
+        
+        
+        
+        
+        freq_filtered = []
+        x_filtered = []
+        y_filtered = []
+        indices = []
+        
+        for j in range(len(sweepDict[name].freq)):
+            for i in range(len(lower_bounds)):
+                if lower_bounds[i] < sweepDict[name].freq[j] < upper_bounds[i]:
+                    #freq_filtered.append(sweepDict[name].freq[j])
+                    #x_filtered.append(sweepDict[name].x[j])
+                    #y_filtered.append(sweepDict[name].y[j])
+                    indices.append(j)
+                    
+                    #print(f"lower_bound = {lower_bounds[i]}")
+                    #print(f"upper_bound = {upper_bounds[i]}")
+                    #print(f"f = {sweepDict[name].freq[j]}")
+                    #input("======================\n")
+                    pass
+                else:
+                    pass
+                    
+                    #freq_filtered.append(sweepDict[name].freq[j])
+                    #x_filtered.append(sweepDict[name].x[j])
+                    #y_filtered.append(sweepDict[name].y[j])
+                    #break
+        for j in range(len(sweepDict[name].freq)):
+            if j in indices:
+                pass
+            else:
+                freq_filtered.append(sweepDict[name].freq[j])
+                x_filtered.append(sweepDict[name].x[j])
+                y_filtered.append(sweepDict[name].y[j])
+            
+        
+        
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        ax.plot(freq_filtered, x_filtered)
+        ax.plot(freq_filtered, y_filtered)
+        
+       # ax.plot(sweepDict[name].freq, sweepDict[name].x)
+       # ax.plot(sweepDict[name].freq, sweepDict[name].y)
+        
+        
+        for bound in lower_bounds:
+            ax.axvline(x=bound, color='b')
+        for bound in upper_bounds:
+            ax.axvline(x=bound, color='r')
+        
+        plt.show()
+        input("---")
+        plt.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        """
         #=====================================================================
         # Perform a Fourier transform on the Lorentzian signal
         
@@ -269,7 +359,7 @@ def main():
         
 
         
-
+        """
 
 
 

@@ -49,6 +49,9 @@
 
  * FFT low-pass filters implemented
 
+ **27-Aug-24
+
+ * Electrical noise filtered through periodic data masking
  
 
 </sub>
